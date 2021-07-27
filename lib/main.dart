@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shoesapp/homepage.dart';
 
+
 void main() {
   runApp(MyApp());
 }
@@ -13,10 +14,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Shoes App',
       theme: ThemeData(
-       
+        fontFamily: 'Nunito' ,
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(),
+      
     );
   }
 }
