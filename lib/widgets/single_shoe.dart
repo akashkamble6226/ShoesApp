@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import '../models/single_shoe_class.dart';
 
 class SingleShoe extends StatelessWidget {
   const SingleShoe({
     Key? key,
     required this.deviceWidth,
+    required this.shoe,
   }) : super(key: key);
 
   final double deviceWidth;
+  final Shoe shoe;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +21,7 @@ class SingleShoe extends StatelessWidget {
         child: Container(
           width: deviceWidth,
           decoration: BoxDecoration(
-              color: HexColor('#7AD7F0').withOpacity(0.2),
+              color: HexColor(shoe.bgColor).withOpacity(0.2),
               borderRadius: BorderRadius.circular(20)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,12 +35,12 @@ class SingleShoe extends StatelessWidget {
                   Align(
                     alignment: Alignment(0.0, 0.0),
                     child: Transform.rotate(
-                      angle: 50,
+                      angle: shoe.rotateAngle.toDouble(),
                       child: Container(
                         width: 150,
                         height: 150,
                         decoration: BoxDecoration(
-                          color: HexColor('#7AD7F0').withOpacity(0.3),
+                          color: HexColor(shoe.bgColor).withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
@@ -51,7 +54,7 @@ class SingleShoe extends StatelessWidget {
                     child: Container(
                       child: Center(
                         child: Image.asset(
-                          'assets/black1.png',
+                          shoe.img,
                           width: 250,
                           height: 200,
                           fit: BoxFit.fitWidth,
@@ -77,7 +80,7 @@ class SingleShoe extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'React Escape Run',
+                          shoe.shoeName,
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
@@ -105,11 +108,11 @@ class SingleShoe extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      '₹ 135',
+                      '₹ '+shoe.price,
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: HexColor('#7AD7F0')),
+                          color: HexColor(shoe.bgColor)),
                     ),
                   ],
                 ),

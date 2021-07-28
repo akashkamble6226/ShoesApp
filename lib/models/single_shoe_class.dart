@@ -3,7 +3,7 @@ class Shoe {
   final int rotateAngle;
   final String img;
   final String shoeName;
-  final int price;
+  final String price;
 
   Shoe({
     required this.bgColor,
