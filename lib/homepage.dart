@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:shoesapp/models/show_dummy_data.dart';
+import 'package:shoesapp/widgets/shoe_details.dart';
 import 'package:shoesapp/widgets/single_shoe.dart';
 
 class MyHomePage extends StatelessWidget {
@@ -27,14 +29,21 @@ class MyHomePage extends StatelessWidget {
                   ),
                   // list view
                   Expanded(
-                                      child: Container(
+                    child: Container(
                       child: ListView.builder(
                         shrinkWrap: true,
                         itemCount: shoeItems.length,
                         itemBuilder: (BuildContext ctx, int index) {
-                          return SingleShoe(
-                            shoe: shoeItems[index],
-                            deviceWidth: deviceWidth,
+                          return GestureDetector(
+                            onTap: () {
+                              Get.to(()=>ShoeDetails(index: index));
+                              // print("Clicked");
+                            },
+                            child: SingleShoe(
+                              shoe: shoeItems[index],
+                              deviceWidth: deviceWidth,
+                              index:index,
+                            ),
                           );
                         },
                       ),
@@ -130,6 +139,4 @@ class MenuBar extends StatelessWidget {
   }
 }
 
-// create class
-// create dummy data
-// create list view
+

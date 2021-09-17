@@ -8,10 +8,12 @@ class SingleShoe extends StatelessWidget {
     Key? key,
     required this.deviceWidth,
     required this.shoe,
+    required this.index,
   }) : super(key: key);
 
   final double deviceWidth;
   final Shoe shoe;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +56,12 @@ class SingleShoe extends StatelessWidget {
                     child: Container(
                       child: Center(
                         child: Image.asset(
-                          shoe.img,
-                          width: 250,
-                          height: 200,
-                          fit: BoxFit.fitWidth,
-                        ),
+                            shoe.img,
+                            width: 250,
+                            height: 200,
+                            fit: BoxFit.fitWidth,
+                          ),
+                        
                       ),
                     ),
                   ),
@@ -108,7 +111,7 @@ class SingleShoe extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      '₹ '+shoe.price,
+                      '\$ ' + shoe.price,
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,

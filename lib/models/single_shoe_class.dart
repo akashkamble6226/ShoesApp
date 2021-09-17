@@ -4,6 +4,8 @@ class Shoe {
   final String img;
   final String shoeName;
   final String price;
+  final List<String> images;  
+
 
   Shoe({
     required this.bgColor,
@@ -11,5 +13,6 @@ class Shoe {
     required this.price,
     required this.rotateAngle,
     required this.shoeName,
+    required this.images,
   });
 }
