@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import "package:flutter/material.dart";
@@ -5,10 +6,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:shoesapp/controllers/change_image_controller.dart';
-import 'package:shoesapp/controllers/disappear_Image_controller.dart';
+import 'package:shoesapp/controllers/dynamic_shoe_size.dart';
 import 'package:shoesapp/controllers/shoe_size_controller.dart';
 import 'package:shoesapp/models/single_shoe_class.dart';
-import 'package:shoesapp/widgets/small_shoe_animation.dart';
+
 import '../models/show_dummy_data.dart';
 
 class ShoeDetails extends StatefulWidget {
@@ -35,6 +36,8 @@ class _ShoeDetailsState extends State<ShoeDetails>
   bool itsVisible = true;
   bool smallShoeItsVisible = false;
 
+  
+
   @override
   void initState() {
     floatingButtonController = AnimationController(
@@ -47,18 +50,33 @@ class _ShoeDetailsState extends State<ShoeDetails>
 
     // small shoe animation
     _controller = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 10000));
+        vsync: this, duration: Duration(milliseconds: 4000));
     super.initState();
     _animation = Tween(begin: 0.4, end: 1.0).animate(_controller)
       ..addListener(() {
         setState(() {});
       });
 
-    _controller.forward();
+    // _controller.forward();
 
-    _path = drawPath();
+    // checking whether the screen is scrolled or not
+     var _scrollController = ScrollController();
+     double height = 600;
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        // Perform your task
+        height = 600.0;
+        
+      }
+      else
+      {
+         height = 700.0;
+      }
+    });
 
-    super.initState();
+    _path = drawPath(height);
+
+    //super.initState();
   }
 
   @override
@@ -69,8 +87,8 @@ class _ShoeDetailsState extends State<ShoeDetails>
     super.dispose();
   }
 
-  Path drawPath() {
-    Size size = Size(300, 650);
+  Path drawPath(double height) {
+    Size size = Size(300, height - 15);
     Path path = Path();
     //  path.lineTo(size.width /2, 0);
     path.cubicTo(size.width * 0.96, size.height * 0.36, size.width,
@@ -87,13 +105,28 @@ class _ShoeDetailsState extends State<ShoeDetails>
   }
 
   bool startOnce = true;
+  bool isActiveCount = false;
   void startFloatingButtonAnimation() {
     if (startOnce) {
       startOnce = false;
 
       floatingButtonController.forward();
 
-      // _controller.forward();
+      _controller.forward();
+
+      _controller.addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          setState(() {
+            smallShoeItsVisible = false;
+            //floatingButtonController.forward();
+            //take the floating button up again
+
+            isActiveCount = true;
+            // sleep(const Duration(seconds: 2));
+            reverseToInitialStage();
+          });
+        }
+      });
 
       floatingButtonController.addStatusListener((status) {
         if (status == AnimationStatus.completed) {
@@ -104,8 +137,19 @@ class _ShoeDetailsState extends State<ShoeDetails>
             smallShoeItsVisible = true;
           });
         }
+
+        //  reverseToInitialStage();
       });
     }
+  }
+
+  Future<void> reverseToInitialStage() async {
+    await Future.delayed(Duration(seconds: 1));
+    setState(() {
+      itsVisible = true;
+      smallShoeItsVisible = false;
+      isActiveCount = false;
+    });
   }
 
   @override
@@ -117,8 +161,8 @@ class _ShoeDetailsState extends State<ShoeDetails>
     final ShoeSizeController shoeSizeController = Get.put(ShoeSizeController());
     final ChangeImageController changeImageController =
         Get.put(ChangeImageController());
-    final DisappearImageController disapperImageController =
-        Get.put(DisappearImageController());
+    final DynamicShoeSize dynamicShoeSizeController =
+        Get.put(DynamicShoeSize());
 
     return SafeArea(
       child: Scaffold(
@@ -367,12 +411,12 @@ class _ShoeDetailsState extends State<ShoeDetails>
                       child: Align(
                         alignment: Alignment.center,
                         child: Image.asset(
-                   shoe.images[0],
-                    //  scale: 2.5,
-                    width: 70,
-                    height: 50,
-                    fit: BoxFit.fitWidth,
-                  ),
+                          shoe.images[0],
+                          //  scale: 2.5,
+                          width: 70,
+                          height: 50,
+                          fit: BoxFit.fitWidth,
+                        ),
                       ),
                     )
                   : Text(""),
@@ -386,13 +430,20 @@ class _ShoeDetailsState extends State<ShoeDetails>
   Widget buildFittedBox() {
     return FittedBox(
       child: FloatingActionButton(
-          onPressed: () {
-            startFloatingButtonAnimation();
-          },
-          backgroundColor: Colors.black,
-          child: Center(
-            child: Icon(Icons.shopping_cart_outlined),
-          )),
+        onPressed: () {
+          startFloatingButtonAnimation();
+        },
+        backgroundColor: isActiveCount ? HexColor('#FF8C00') : Colors.black,
+        child: Center(
+          child: isActiveCount
+              ? Text('+1',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ))
+              : Icon(Icons.shopping_cart_outlined),
+        ),
+      ),
     );
   }
 
