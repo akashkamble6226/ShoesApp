@@ -7,14 +7,7 @@ class ChangeImageController extends GetxController {
   late ScrollController scrollController;
 
   _scrollListener() {
-    // if (scrollController.offset >= scrollController.position.maxScrollExtent && !scrollController.position.outOfRange)
-    // {
-    //   print("Reached the End");
-    // }
-    // if (scrollController.offset <= scrollController.position.minScrollExtent && !scrollController.position.outOfRange)
-    // {
-    //   print("Reached To Top");
-    // }
+   
 
     int index = (scrollController.offset / 350).round() + 1;
 

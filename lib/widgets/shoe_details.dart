@@ -6,7 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:shoesapp/controllers/change_image_controller.dart';
-import 'package:shoesapp/controllers/dynamic_shoe_size.dart';
+import 'package:shoesapp/controllers/dynamic_scroll_size.dart';
 import 'package:shoesapp/controllers/shoe_size_controller.dart';
 import 'package:shoesapp/models/single_shoe_class.dart';
 
@@ -31,12 +31,14 @@ class _ShoeDetailsState extends State<ShoeDetails>
   late Animation _animation;
   late Path _path;
 
-  // shoe shrink down animation
+  late AnimationController sizeController;
+
+  late Animation sizeAnimation;
+
+  
 
   bool itsVisible = true;
   bool smallShoeItsVisible = false;
-
-  
 
   @override
   void initState() {
@@ -57,24 +59,16 @@ class _ShoeDetailsState extends State<ShoeDetails>
         setState(() {});
       });
 
-    // _controller.forward();
+    sizeController =
+        AnimationController(vsync: this, duration: Duration(seconds: 5));
+    sizeAnimation =
+        Tween<double>(begin: 200.0, end: 70.0).animate(sizeController);
 
-    // checking whether the screen is scrolled or not
-     var _scrollController = ScrollController();
-     double height = 600;
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        // Perform your task
-        height = 600.0;
-        
-      }
-      else
-      {
-         height = 700.0;
-      }
+    sizeController.addListener(() {
+      setState(() {});
     });
 
-    _path = drawPath(height);
+    sizeController.forward();
 
     //super.initState();
   }
@@ -97,6 +91,7 @@ class _ShoeDetailsState extends State<ShoeDetails>
   }
 
   Offset calculate(value) {
+    // print(value);
     PathMetrics pathMetrics = _path.computeMetrics();
     PathMetric pathMetric = pathMetrics.elementAt(0);
     value = pathMetric.length * value;
@@ -106,7 +101,7 @@ class _ShoeDetailsState extends State<ShoeDetails>
 
   bool startOnce = true;
   bool isActiveCount = false;
-  void startFloatingButtonAnimation() {
+  void startFloatingButtonAnimation(double height) {
     if (startOnce) {
       startOnce = false;
 
@@ -131,6 +126,7 @@ class _ShoeDetailsState extends State<ShoeDetails>
       floatingButtonController.addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           floatingButtonController.reverse();
+          _path = drawPath(height);
 
           setState(() {
             itsVisible = false;
@@ -161,8 +157,8 @@ class _ShoeDetailsState extends State<ShoeDetails>
     final ShoeSizeController shoeSizeController = Get.put(ShoeSizeController());
     final ChangeImageController changeImageController =
         Get.put(ChangeImageController());
-    final DynamicShoeSize dynamicShoeSizeController =
-        Get.put(DynamicShoeSize());
+    final DynamicScrollSize dynamicScrollSize =
+        Get.put(DynamicScrollSize());
 
     return SafeArea(
       child: Scaffold(
@@ -179,275 +175,301 @@ class _ShoeDetailsState extends State<ShoeDetails>
             },
           ),
         ),
-        body: SingleChildScrollView(
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Container(
-                      height: height * 0.6,
-                      decoration: BoxDecoration(
-                          color: HexColor(shoe.bgColor).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20)),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                left: 10, right: 10, top: 20),
-                            child: Row(
+        body: GetBuilder<DynamicScrollSize>(
+          init: DynamicScrollSize(),
+          builder: (controller) {
+            return ListView(
+              controller: controller.scrollController,
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              children: [
+                Stack(
+                  children: [
+                    Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Container(
+                            height: height * 0.6,
+                            decoration: BoxDecoration(
+                                color: HexColor(shoe.bgColor).withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(20)),
+                            child: Column(
                               children: [
-                                IconButton(
-                                  onPressed: () {
-                                    Get.back();
-                                  },
-                                  icon: FaIcon(
-                                    FontAwesomeIcons.arrowLeft,
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 10, right: 10, top: 20),
+                                  child: Row(
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          Get.back();
+                                        },
+                                        icon: FaIcon(
+                                          FontAwesomeIcons.arrowLeft,
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      GetBuilder<ChangeImageController>(
+                                        init: ChangeImageController(),
+                                        builder: (imagecontroller) {
+                                          return Row(
+                                            children: [
+                                              buildContainer(
+                                                  imagecontroller.isActive[0]),
+                                              SizedBox(width: 5),
+                                              buildContainer(
+                                                  imagecontroller.isActive[1]),
+                                              SizedBox(width: 5),
+                                              buildContainer(
+                                                  imagecontroller.isActive[2]),
+                                              SizedBox(width: 5),
+                                              buildContainer(
+                                                  imagecontroller.isActive[3]),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                      Spacer(),
+                                      IconButton(
+                                          onPressed: () {},
+                                          icon: FaIcon(FontAwesomeIcons.heart))
+                                    ],
                                   ),
                                 ),
-                                Spacer(),
-                                GetBuilder<ChangeImageController>(
-                                  init: ChangeImageController(),
-                                  builder: (imagecontroller) {
-                                    return Row(
-                                      children: [
-                                        buildContainer(
-                                            imagecontroller.isActive[0]),
-                                        SizedBox(width: 5),
-                                        buildContainer(
-                                            imagecontroller.isActive[1]),
-                                        SizedBox(width: 5),
-                                        buildContainer(
-                                            imagecontroller.isActive[2]),
-                                        SizedBox(width: 5),
-                                        buildContainer(
-                                            imagecontroller.isActive[3]),
-                                      ],
-                                    );
-                                  },
+
+                                // main shoe widget
+                                Stack(
+                                  // alignment: Alignment.center,
+                                  children: [
+                                    Container(
+                                      height: height * 0.4,
+                                      width: width,
+                                      child: Align(
+                                        alignment: Alignment(0.0, 0.8),
+                                        child: Transform.rotate(
+                                          angle: shoe.rotateAngle.toDouble(),
+                                          child: Container(
+                                            width: 220,
+                                            height: 220,
+                                            decoration: BoxDecoration(
+                                              color: HexColor(shoe.bgColor)
+                                                  .withOpacity(0.2),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    AnimatedPositioned(
+                                      duration: Duration(seconds: 5),
+                                      curve: Curves.easeInCubic,
+                                      top: 0,
+                                      left: 0,
+                                      right: 0,
+                                      bottom: 0,
+                                      child: buildListView(shoe),
+                                    ),
+                                  ],
                                 ),
-                                Spacer(),
-                                IconButton(
-                                    onPressed: () {},
-                                    icon: FaIcon(FontAwesomeIcons.heart))
                               ],
                             ),
                           ),
-
-                          // main shoe widget
-                          Stack(
-                            // alignment: Alignment.center,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20, bottom: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Text(
+                                'Women Running Shoes',
+                                style: TextStyle(fontSize: 15),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    shoe.shoeName,
+                                    style: TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Spacer(),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 20),
+                                    child: Text(
+                                      '\$ ' + shoe.price,
+                                      style: TextStyle(
+                                          fontSize: 30,
+                                          fontWeight: FontWeight.bold,
+                                          color: HexColor("#FF8C00")),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                "Select size",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
                               Container(
-                                height: height * 0.4,
-                                width: width,
-                                child: Align(
-                                  alignment: Alignment(0.0, 0.8),
-                                  child: Transform.rotate(
-                                    angle: shoe.rotateAngle.toDouble(),
-                                    child: Container(
-                                      width: 220,
-                                      height: 220,
-                                      decoration: BoxDecoration(
-                                        color: HexColor(shoe.bgColor)
-                                            .withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
+                                height: 70,
+                                child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    shrinkWrap: true,
+                                    itemCount: 6,
+                                    itemBuilder: (BuildContext ctx, int index) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(5),
+                                        child: GetBuilder<ShoeSizeController>(
+                                            init: ShoeSizeController(),
+                                            builder: (controller) {
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  controller
+                                                      .toggleSelectSize(index);
+                                                },
+                                                child: Container(
+                                                  width: 60,
+                                                  height: 60,
+                                                  decoration: BoxDecoration(
+                                                    color: controller
+                                                            .isActive[index]
+                                                        ? HexColor("#FF8C00")
+                                                        : Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15),
+                                                    border: Border.all(
+                                                        color: controller
+                                                                .isActive[index]
+                                                            ? HexColor(
+                                                                "#FF8C00")
+                                                            : Colors.grey),
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      controller
+                                                          .shoeSize[index],
+                                                      style: TextStyle(
+                                                          color: controller
+                                                                      .isActive[
+                                                                  index]
+                                                              ? Colors.white
+                                                              : Colors.grey,
+                                                          fontSize: 18),
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            }),
+                                      );
+                                    }),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: Container(
+                                  width: width,
+                                  height: 55,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15),
+                                    color: Colors.grey.withOpacity(0.2),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      "Find in store",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ),
                               ),
-                              AnimatedPositioned(
-                                duration: Duration(seconds: 5),
-                                curve: Curves.easeInCubic,
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                child: buildListView(shoe),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: Container(
+                                  width: width,
+                                  child: Text(
+                                    "Run the streets in the Nike React Escape Run.Designed and tailored for women, it features a wider collar and embroidered details.Cushioned foam provides a soft, responsive feel on the go.Escape the daily routine and reconnect with yourself through your miles.",
+                                    textAlign: TextAlign.justify,
+                                  ),
+                                ),
                               ),
                             ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 20, bottom: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          'Women Running Shoes',
-                          style: TextStyle(fontSize: 15),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              shoe.shoeName,
-                              style: TextStyle(
-                                  fontSize: 25, fontWeight: FontWeight.bold),
-                            ),
-                            Spacer(),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 20),
-                              child: Text(
-                                '\$ ' + shoe.price,
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    color: HexColor("#FF8C00")),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          "Select size",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Container(
-                          height: 70,
-                          child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              shrinkWrap: true,
-                              itemCount: 6,
-                              itemBuilder: (BuildContext ctx, int index) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: GetBuilder<ShoeSizeController>(
-                                      init: ShoeSizeController(),
-                                      builder: (controller) {
-                                        return GestureDetector(
-                                          onTap: () {
-                                            controller.toggleSelectSize(index);
-                                          },
-                                          child: Container(
-                                            width: 60,
-                                            height: 60,
-                                            decoration: BoxDecoration(
-                                              color: controller.isActive[index]
-                                                  ? HexColor("#FF8C00")
-                                                  : Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(15),
-                                              border: Border.all(
-                                                  color:
-                                                      controller.isActive[index]
-                                                          ? HexColor("#FF8C00")
-                                                          : Colors.grey),
-                                            ),
-                                            child: Center(
-                                              child: Text(
-                                                controller.shoeSize[index],
-                                                style: TextStyle(
-                                                    color: controller
-                                                            .isActive[index]
-                                                        ? Colors.white
-                                                        : Colors.grey,
-                                                    fontSize: 18),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      }),
-                                );
-                              }),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: Container(
-                            width: width,
-                            height: 55,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Colors.grey.withOpacity(0.2),
-                            ),
-                            child: Center(
-                              child: Text(
-                                "Find in store",
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: Container(
-                            width: width,
-                            child: Text(
-                              "Run the streets in the Nike React Escape Run.Designed and tailored for women, it features a wider collar and embroidered details.Cushioned foam provides a soft, responsive feel on the go.Escape the daily routine and reconnect with yourself through your miles.",
-                              textAlign: TextAlign.justify,
-                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              smallShoeItsVisible
-                  ? Positioned(
-                      top: calculate(_animation.value).dy,
-                      left: calculate(_animation.value).dx,
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Image.asset(
-                          shoe.images[0],
-                          //  scale: 2.5,
-                          width: 70,
-                          height: 50,
-                          fit: BoxFit.fitWidth,
-                        ),
-                      ),
-                    )
-                  : Text(""),
-            ],
-          ),
+                    smallShoeItsVisible
+                        ? Positioned(
+                            top: calculate(_animation.value).dy,
+                            left: calculate(_animation.value).dx,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Image.asset(
+                                shoe.images[0],
+                                //  scale: 2.5,
+                                // width:_animation.value >0.80 ?  10.0 +(_animation.value * 50.0 ):10.0 +(_animation.value * 100.0 ),
+                                // width: MediaQuery.of(context).size.height * 0.5,
+                                width: sizeAnimation.value,
+                                height: sizeAnimation.value,
+                                // fit: BoxFit.fitWidth,
+                              ),
+                            ),
+                          )
+                        : Text(""),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
   Widget buildFittedBox() {
-    return FittedBox(
-      child: FloatingActionButton(
-        onPressed: () {
-          startFloatingButtonAnimation();
-        },
-        backgroundColor: isActiveCount ? HexColor('#FF8C00') : Colors.black,
-        child: Center(
-          child: isActiveCount
-              ? Text('+1',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ))
-              : Icon(Icons.shopping_cart_outlined),
-        ),
-      ),
+    return GetBuilder<DynamicScrollSize>(
+      init: DynamicScrollSize(),
+      builder: (controller) {
+        return FittedBox(
+          child: FloatingActionButton(
+            onPressed: () {
+              startFloatingButtonAnimation(controller.height);
+            },
+            backgroundColor: isActiveCount ? HexColor('#FF8C00') : Colors.black,
+            child: Center(
+              child: isActiveCount
+                  ? Text('+1',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ))
+                  : Icon(Icons.shopping_cart_outlined),
+            ),
+          ),
+        );
+      },
     );
   }
 
-// HexColor('') :
+
   Container buildContainer(bool isActive) {
     return isActive
         ? Container(
@@ -503,20 +525,3 @@ class _ShoeDetailsState extends State<ShoeDetails>
     );
   }
 }
-
-/*
-  AnimatedOpacity(
-                duration: Duration(seconds: 0),
-                opacity: widget.smallShoeItsVisible ? 1.0 : 0.0,
-                child: Align(
-                  alignment: Alignment(0.0,0.0),
-                                  child: Image.asset(
-                    widget.shoe.images[0],
-                    //  scale: 2.5,
-                    width: 100,
-                    height: 50,
-                    fit: BoxFit.fitWidth,
-                  ),
-                ),
-              ),
- */

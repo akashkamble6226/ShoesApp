@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 
 class ShoeSizeController extends GetxController {
   var shoeSize = ["36", "37", "38", "39", "40", "41"];
-  var isActive = [false, true, false, false, false, false];
+  var isActive = [false, false, false, false, false, false];
 
   void toggleSelectSize(int index) {
     isActive[index] = true;
